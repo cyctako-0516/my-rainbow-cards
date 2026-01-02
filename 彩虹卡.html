@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隨機彩虹卡日誌 🌈</title>
+    <style>
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; color: #333; }
+        .card-display { width: 100%; max-width: 400px; height: 280px; border-radius: 25px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 30px; margin: 20px 0; font-size: 22px; font-weight: bold; color: white; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; box-shadow: 0 15px 35px rgba(0,0,0,0.15); box-sizing: border-box; }
+        .draw-btn { padding: 15px 50px; border: none; border-radius: 50px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .draw-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+        
+        .history-section { width: 100%; max-width: 500px; margin-top: 40px; }
+        .history-item { background: white; padding: 15px; border-radius: 15px; margin-bottom: 12px; display: flex; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .color-dot { width: 15px; height: 15px; border-radius: 50%; margin-right: 15px; flex-shrink: 0; }
+        .history-content { flex: 1; font-size: 15px; }
+        .history-date { font-size: 11px; color: #999; margin-left: 10px; }
+    </style>
+</head>
+<body>
+
+    <h2>🌈 隨機彩虹卡指引</h2>
+    <p style="color: #666;">放下所有預設，讓當下的能量指引你。</p>
+
+    <div id="main-card" class="card-display" style="background: #ccc; color: #eee;">
+        深呼吸...<br>準備好就按下方按鈕
+    </div>
+
+    <button class="draw-btn" onclick="drawCard()">隨機抽一張</button>
+
+    <div class="history-section">
+        <h3>📅 抽取紀錄</h3>
+        <div id="history-list"></div>
+    </div>
+
+<script>
+    // 豐富的語錄庫，不分顏色
+    const quotes = [
+        "我願意放下過去，充滿信心地邁向未來。",
+        "我值得擁有快樂、豐富且充滿創造力的生活。",
+        "我有勇氣表達自己的真相，並尊重他人的權利。",
+        "我開啟我的心，去愛人並接受愛。",
+        "我平靜且清晰地表達我的想法與感受。",
+        "我信任我的直覺，我能看清生命的真相。",
+        "我與宇宙的智慧連結，內心感到平靜安詳。",
+        "我由衷地感激生命中所有美好的事物。",
+        "我接受我現在的樣子，我愛我自己。",
+        "我充滿活力，我能實現我的夢想。",
+        "我身邊充滿了支持我、愛我的人。",
+        "我能在任何情況下找到平靜。",
+        "我釋放恐懼，選擇用愛看待這世界。",
+        "我是一個獨特且美麗的存在。",
+        "我的生命充滿了無限的可能性。",
+        "我溫柔地對待自己與他人。",
+        "我吸引成功的能量來到我身邊。",
+        "我是我生命的主人，我擁有選擇的權力。",
+        "每一天都是一個全新的開始。",
+        "我的內心充滿陽光，我能照亮他人。",
+        "我放下擔憂，臣服於生命的流動。"
+    ];
+
+    const colors = ["#FF4757", "#FFA502", "#E8D01E", "#2ED573", "#1E90FF", "#3742FA", "#A55EEA", "#FD79A8", "#00CEC9"];
+
+    let history = JSON.parse(localStorage.getItem('random_rainbow_history')) || [];
+
+    function drawCard() {
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        const now = new Date();
+        const dateStr = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+        // 更新 UI 效果
+        const mainCard = document.getElementById('main-card');
+        mainCard.style.transform = "rotateY(360deg)";
+        setTimeout(() => {
+            mainCard.style.background = randomColor;
+            mainCard.style.color = "white";
+            mainCard.innerText = randomQuote;
+            mainCard.style.transform = "rotateY(0deg)";
+        }, 150);
+
+        // 儲存紀錄
+        const record = { text: randomQuote, color: randomColor, date: dateStr };
+        history.unshift(record);
+        if(history.length > 50) history.pop();
+        
+        localStorage.setItem('random_rainbow_history', JSON.stringify(history));
+        
+        setTimeout(renderHistory, 300);
+        speak(randomQuote);
+    }
+
+    function renderHistory() {
+        const list = document.getElementById('history-list');
+        list.innerHTML = '';
+        
+        history.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `
+                <div class="color-dot" style="background: ${item.color}"></div>
+                <div class="history-content">${item.text}</div>
+                <div class="history-date">${item.date}</div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    function speak(text) {
+        const synth = window.speechSynthesis;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'zh-TW';
+        utter.rate = 0.85;
+        synth.speak(utter);
+    }
+
+    renderHistory();
+</script>
+
+</body>
+</html>
